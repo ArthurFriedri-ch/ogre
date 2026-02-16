@@ -68,22 +68,17 @@ public:
     bool isDragging() const;
 
 private:
-    static void createMesh(Ogre::SceneManager* manager, Ogre::String name);
-
-    static void createPlaneMesh(Ogre::SceneManager* manager, Ogre::String name);
+    static void createMesh(Ogre::SceneManager* manager, const Ogre::String& name,
+                           const Ogre::ColourValue& xColor, const Ogre::ColourValue& yColor,
+                           const Ogre::ColourValue& zColor,
+                           const Ogre::ColourValue& xyColor, const Ogre::ColourValue& yzColor,
+                           const Ogre::ColourValue& zxColor);
 
     void scaleToParent();
 
     void highlightAxis(AXIS axis);
 
-    static Ogre::Real rayLineDistance(const Ogre::Ray& ray, const Ogre::Vector3& lineOrigin,
-                                      const Ogre::Vector3& lineDir, Ogre::Real lineLength);
-
     Ogre::Ray toLocalRay(const Ogre::Ray& worldRay) const;
-
-    static bool pickRotateRing(const Ogre::Ray& ray, const Ogre::Vector3& center,
-                               const Ogre::Vector3& axis,
-                               Ogre::Real radius, Ogre::Real tolerance);
 
     static Ogre::Vector3 computePlaneHit(const Ogre::Ray& ray, const Ogre::Vector3& axis,
                                          const Ogre::Vector3& cameraDir, const Ogre::Vector3& planePoint);
@@ -94,10 +89,7 @@ private:
     // Gizmo nodes
     Ogre::SceneNode* mGizmoNode{};
     Ogre::SceneNode* mParentNode{};
-    Ogre::SceneNode* mGizmoX{};
-    Ogre::SceneNode* mGizmoY{};
-    Ogre::SceneNode* mGizmoZ{};
-    Ogre::Entity* mGizmoEntities[6]{};
+    Ogre::Entity* mGizmoEntity{};
 
     // Drag state
     bool mDragging = false;
@@ -108,9 +100,14 @@ private:
     Ogre::Vector3 mDragAxisLocal;
     Ogre::Vector3 mDragAxisWorld;
     Ogre::Vector3 mDragStartHitLocal;
+    Ogre::Vector3 mDragLastHitLocal;
+    Ogre::Radian mDragAccumulatedAngle{0};
+    Ogre::Quaternion mDragGizmoOrientation = Ogre::Quaternion::IDENTITY;
+    Ogre::Vector3 mDragGizmoCenter = Ogre::Vector3::ZERO;
+    Ogre::Vector3 mDragPlaneNormalLocal;
+    bool mDragUsePlane = false;
 
     // Picking
-    std::unordered_map<Ogre::Entity*, int> mEntityToAxis;
     int mOldGizmoAxis{};
 };
 
@@ -133,21 +130,13 @@ public:
 protected:
     void createMesh(Ogre::SceneManager* manager, Ogre::String name);
 
-    static void addCircle(Ogre::Real x, Ogre::MeshPtr mesh);
-
-    static void addLine(const Ogre::Vector3& a, const Ogre::Vector3& b, Ogre::MeshPtr mesh);
-
-    static void addFan(int center, int start, int count, Ogre::MeshPtr mesh);
-
-    static void addRotatedCircle(const Ogre::Quaternion& q, const Ogre::Vector3& t, Ogre::Real x, Ogre::MeshPtr mesh);
-
-    Ogre::RaySceneQuery* mRayQuery{};
     Ogre::SceneNode* mGizmoNode{};
     CameraMan* mCameraMan;
     Ogre::Camera* mGizmoCamera;
     Ogre::SceneNode* mGizmoCameraNode;
     Ogre::Node* mCameraNode{};
-    int mOldFaceIndex{};
+    int mOldFaceIndex = -1;
+    Ogre::SceneNode* mFaceNodes[6]{};
     Ogre::ManualObject* mGizmoObjects[6]{};
 };
 } // namespace OgreBites
