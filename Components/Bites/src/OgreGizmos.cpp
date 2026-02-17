@@ -1,13 +1,11 @@
 #include "OgreGizmos.h"
 #include "OgreManualObject.h"
-#include "OgreMesh.h"
-#include "OgreMaterial.h"
 #include "OgreMaterialManager.h"
-#include "OgrePass.h"
+#include "OgreMesh.h"
 #include "OgrePlaneBoundedVolume.h"
 #include "OgreRenderWindow.h"
-#include "OgreRoot.h"
 #include "OgreResourceGroupManager.h"
+#include "OgreRoot.h"
 #include "OgreSceneManager.h"
 #include "OgreSubEntity.h"
 #include "OgreTechnique.h"
@@ -23,25 +21,6 @@ namespace OgreBites
 using namespace Ogre;
 namespace
 {
-void ensureVertexColorMaterial(const String& name, bool alpha)
-{
-    auto& mm = MaterialManager::getSingleton();
-    MaterialPtr mat = mm.getByName(name, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-    if (mat.isNull())
-        mat = mm.create(name, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-
-    Pass* pass = mat->getTechnique(0)->getPass(0);
-    pass->setLightingEnabled(false);
-    pass->setVertexColourTracking(TVC_AMBIENT | TVC_DIFFUSE);
-    pass->setDepthCheckEnabled(false);
-    pass->setCullingMode(CULL_NONE);
-    pass->setManualCullingMode(MANUAL_CULL_NONE);
-    pass->setPolygonMode(PM_SOLID);
-    pass->setPolygonModeOverrideable(false);
-    if (alpha)
-        pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
-}
-
 void addPosition(const Vector3& p, const Quaternion& rot, ManualObject* mesh,
                  const ColourValue& color)
 {
@@ -115,22 +94,15 @@ void updateCameraQuad(ManualObject* mo, const ColourValue& color)
     mo->end();
 }
 
-Ray toLocalRayNode(const Ray& worldRay, const SceneNode* node)
-{
-    Matrix4 inv = node->_getFullTransform().inverse();
-
-    Vector3 localOrigin = inv * worldRay.getOrigin();
-    Vector3 localDir = inv.linear() * worldRay.getDirection();
-    localDir.normalise();
-
-    return Ray(localOrigin, localDir);
-}
 } // namespace
 
 Gizmo::Gizmo(SceneManager* sceneManager, SceneNode* sceneNode, GizmoMode mode) : mMode(G_NONE)
 {
-    ensureVertexColorMaterial("MAT_GIZMO_VERTEX", true);
-    ensureVertexColorMaterial("MAT_GIZMO_VERTEX_HL", false);
+    #if (OGRE_VERSION < ((1 << 16) | (9 << 8) | 0))
+        Ogre::MaterialPtr gizmoMaterial = MaterialManager::getSingletonPtr()->createOrRetrieve("AxisGizmo_Material", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME).first;
+    #else
+        Ogre::MaterialPtr gizmoMaterial = MaterialManager::getSingletonPtr()->createOrRetrieve("AxisGizmo_Material", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME).first.staticCast<Ogre::Material>();
+    #endif
 
     createMesh(sceneManager, "AxisGizmosMesh",
                ColourValue(1.0f, 0.0f, 0.0f, 0.50f),
@@ -146,7 +118,7 @@ Gizmo::Gizmo(SceneManager* sceneManager, SceneNode* sceneNode, GizmoMode mode) :
 
     mGizmoEntity = sceneManager->createEntity("scbw", "AxisGizmosMesh", RGN_INTERNAL);
     mGizmoEntity->setCastShadows(false);
-    mGizmoEntity->setMaterialName("MAT_GIZMO_VERTEX");
+    mGizmoEntity->setMaterialName("AxisGizmo_Material");
     mGizmoEntity->setRenderQueueGroup(RENDER_QUEUE_SKIES_LATE);
     mGizmoEntity->setQueryFlags(QUERYFLAG_GIZMO);
 
@@ -527,11 +499,11 @@ void Gizmo::createMesh(SceneManager* manager, const String& name,
 
     auto addAxis = [&](const Quaternion& rot, const ColourValue& color)
     {
-        mMesh->begin("MAT_GIZMO_VERTEX", RenderOperation::OT_LINE_LIST);
+        mMesh->begin("AxisGizmo_Material", RenderOperation::OT_LINE_LIST);
         addLine(Vector3::ZERO, Vector3(3, 0, 0), rot, mMesh, color);
         mMesh->end();
 
-        mMesh->begin("MAT_GIZMO_VERTEX", RenderOperation::OT_LINE_STRIP);
+        mMesh->begin("AxisGizmo_Material", RenderOperation::OT_LINE_STRIP);
         int arcBase = 0;
         for (Real t = start; t < end; t += division)
         {
@@ -541,7 +513,7 @@ void Gizmo::createMesh(SceneManager* manager, const String& name,
         mMesh->end();
 
         // Translate
-        mMesh->begin("MAT_GIZMO_VERTEX", RenderOperation::OT_TRIANGLE_LIST);
+        mMesh->begin("AxisGizmo_Material", RenderOperation::OT_TRIANGLE_LIST);
         int base = 0;
         addPosition(Vector3(2.85f, 0, 0), rot, mMesh, color);
         addCircle(2.95f, rot, mMesh, color);
@@ -551,7 +523,7 @@ void Gizmo::createMesh(SceneManager* manager, const String& name,
         mMesh->end();
 
         // Rotate
-        mMesh->begin("MAT_GIZMO_VERTEX", RenderOperation::OT_TRIANGLE_LIST);
+        mMesh->begin("AxisGizmo_Material", RenderOperation::OT_TRIANGLE_LIST);
         Quaternion q1(Degree(-90), Vector3::UNIT_Z);
         Quaternion q2(Degree(90), Vector3::UNIT_Y);
         Vector3 t1(0, 3 * cos(end),   3 * sin(end));
@@ -566,7 +538,7 @@ void Gizmo::createMesh(SceneManager* manager, const String& name,
         mMesh->end();
 
         // Scale
-        mMesh->begin("MAT_GIZMO_VERTEX", RenderOperation::OT_TRIANGLE_LIST);
+        mMesh->begin("AxisGizmo_Material", RenderOperation::OT_TRIANGLE_LIST);
         int scaleBase = 0;
         addPosition(Vector3(2.85f, 0, 0), rot, mMesh, color);
         addCircle(2.85f, rot, mMesh, color);
@@ -609,7 +581,7 @@ void Gizmo::createMesh(SceneManager* manager, const String& name,
 
     auto addPlane = [&](const Quaternion& rot, const ColourValue& color)
     {
-        mMesh->begin("MAT_GIZMO_VERTEX", RenderOperation::OT_TRIANGLE_LIST);
+        mMesh->begin("AxisGizmo_Material", RenderOperation::OT_TRIANGLE_LIST);
         for (auto& v : { Vector3(0,0,0), Vector3(1,0,0),
                          Vector3(1,1,0), Vector3(0,1,0) })
         {
@@ -823,7 +795,7 @@ void Gizmo::highlightAxis(AXIS axis)
     const int totalSubMeshes = planeBase + 3;
 
     for (int i = 0; i < totalSubMeshes; ++i)
-        mGizmoEntity->getSubEntity(i)->setMaterialName("MAT_GIZMO_VERTEX");
+        mGizmoEntity->getSubEntity(i)->setMaterialName("AxisGizmo_Material");
 
     if (axis == AXIS_NONE)
         return;
@@ -832,7 +804,7 @@ void Gizmo::highlightAxis(AXIS axis)
     {
         const int base = axisIndex * axisParts;
         for (int i = 0; i < axisParts; ++i)
-            mGizmoEntity->getSubEntity(base + i)->setMaterialName("MAT_GIZMO_VERTEX_HL");
+            mGizmoEntity->getSubEntity(base + i)->setMaterialName("AxisGizmo_Material_Hl");
     };
 
     if (axis & AXIS_X)
@@ -843,11 +815,11 @@ void Gizmo::highlightAxis(AXIS axis)
         highlightAxis(2);
 
     if (axis == AXIS_XY)
-        mGizmoEntity->getSubEntity(planeBase + 0)->setMaterialName("MAT_GIZMO_VERTEX_HL");
+        mGizmoEntity->getSubEntity(planeBase + 0)->setMaterialName("AxisGizmo_Material_Hl");
     else if (axis == AXIS_YZ)
-        mGizmoEntity->getSubEntity(planeBase + 1)->setMaterialName("MAT_GIZMO_VERTEX_HL");
+        mGizmoEntity->getSubEntity(planeBase + 1)->setMaterialName("AxisGizmo_Material_Hl");
     else if (axis == AXIS_XZ)
-        mGizmoEntity->getSubEntity(planeBase + 2)->setMaterialName("MAT_GIZMO_VERTEX_HL");
+        mGizmoEntity->getSubEntity(planeBase + 2)->setMaterialName("AxisGizmo_Material_Hl");
 }
 
 Ray Gizmo::toLocalRay(const Ray& worldRay) const
@@ -1019,7 +991,7 @@ void CameraGizmo::highlightFace(ManualObject* face)
     if (!face)
     {
         for (int i = 0; i < 6; ++i)
-            mGizmoObjects[i]->setMaterialName(0, "MAT_GIZMO_VERTEX");
+            mGizmoObjects[i]->setMaterialName(0, "AxisGizmo_Material");
 
         updateCameraQuad(mGizmoObjects[0], baseX);
         updateCameraQuad(mGizmoObjects[1], baseX);
@@ -1045,7 +1017,7 @@ void CameraGizmo::highlightFace(ManualObject* face)
         return;
     mOldFaceIndex = faceIndex;
     for (int i = 0; i < 6; ++i)
-        mGizmoObjects[i]->setMaterialName(0, "MAT_GIZMO_VERTEX");
+        mGizmoObjects[i]->setMaterialName(0, "AxisGizmo_Material");
 
     updateCameraQuad(mGizmoObjects[0], baseX);
     updateCameraQuad(mGizmoObjects[1], baseX);
@@ -1088,7 +1060,7 @@ void CameraGizmo::createMesh(SceneManager* manager, String name)
         // Face quad
         ManualObject* quad = manager->createManualObject(n + "_Face");
         quad->setDynamic(true);
-        quad->begin("MAT_GIZMO_VERTEX", RenderOperation::OT_TRIANGLE_LIST);
+        quad->begin("AxisGizmo_Material", RenderOperation::OT_TRIANGLE_LIST);
         quad->position(-0.5f, -0.5f, 0.0f); quad->colour(color);
         quad->position( 0.5f, -0.5f, 0.0f); quad->colour(color);
         quad->position( 0.5f,  0.5f, 0.0f); quad->colour(color);
@@ -1099,7 +1071,7 @@ void CameraGizmo::createMesh(SceneManager* manager, String name)
 
         quad->setQueryFlags(QUERYFLAG_GIZMO); // pickable
         quad->setCastShadows(false);
-        quad->setMaterialName(0, "MAT_GIZMO_VERTEX");
+        quad->setMaterialName(0, "AxisGizmo_Material");
         quad->setRenderQueueGroup(RENDER_QUEUE_OVERLAY);
         faceNode->attachObject(quad);
         mGizmoObjects[index] = quad;

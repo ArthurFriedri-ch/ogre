@@ -1,48 +1,36 @@
-material MAT_GIZMO_VERTEX
+material AxisGizmo_Material
 {
 	technique
 	{
 		pass
 		{
             lighting off
-            vertex_colour_tracking ambient_diffuse
+            emissive_colour_tracking vertex
             polygon_mode solid
             polygon_mode_overrideable false
             cull_hardware none
             cull_software none
+            manual_cull none
             depth_check off
+            scene_blend alpha_blend
 		}
 	}
 }
 
-material MAT_GIZMO_VERTEX_ALPHA : MAT_GIZMO_VERTEX
+material AxisGizmo_Material_Hl
 {
     technique
     {
         pass
         {
-            scene_blend alpha_blend
+            lighting off
+            emissive_colour_tracking vertex
+            polygon_mode solid
+            polygon_mode_overrideable false
+            cull_hardware none
+            cull_software none
+            manual_cull none
+            depth_check off
         }
     }
-}
-
-
-material MAT_GIZMO_VERTEX_L
-{
-	technique
-	{
-		pass
-		{
-			ambient 0 0 0 0.9
-			diffuse 0.2 0.2 0.2 0.9
-                  specular 0 0 0 0.9
-                  emissive 1 0 0 0.9
-                  polygon_mode solid
-                  polygon_mode_overrideable false
-                  depth_check off
-                  cull_hardware none
-                  cull_software none
-                  depth_check off
-		}
-	}
 }
