@@ -35,11 +35,15 @@ class GLSLangProgram : public HighLevelGpuProgram
     void prepareImpl() override;
 
     std::vector<uint32> mAssembly;
+    String mDescriptorSetProfile;
 public:
     GLSLangProgram(ResourceManager* creator, const String& name, ResourceHandle handle, const String& group,
                    bool isManual, ManualResourceLoader* loader);
     ~GLSLangProgram();
     const String& getLanguage(void) const override;
+
+    void setDescriptorSetProfile(const String& profile) { mDescriptorSetProfile = profile; }
+    const String& getDescriptorSetProfile() const { return mDescriptorSetProfile; }
 
     bool isSupported() const override;
 };
