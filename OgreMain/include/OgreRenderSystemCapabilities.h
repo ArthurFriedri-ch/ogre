@@ -268,7 +268,7 @@ namespace Ogre
         typedef std::set<String> ShaderProfiles;
     private:
         /// This is used to build a database of RSC's
-        /// if a RSC with same name, but newer version is introduced, the older one 
+        /// if a RSC with same name, but newer version is introduced, the older one
         /// will be removed
         DriverVersion mDriverVersion;
         /// GPU Vendor
@@ -310,7 +310,7 @@ namespace Ogre
 
         /// The number of vertex attributes available
         ushort mNumVertexAttributes;
-    public: 
+    public:
         RenderSystemCapabilities ();
 
         /** Set the driver version. */

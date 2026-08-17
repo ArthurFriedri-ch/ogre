@@ -78,6 +78,7 @@ namespace Ogre
     {
         mFinalTextureName = 0;
         destroyMsaaSurface();
+        destroyStorageImageView();
     }
     //-----------------------------------------------------------------------------------
     void VulkanTextureGpuWindow::getCustomAttribute( const String& name, void *pData )

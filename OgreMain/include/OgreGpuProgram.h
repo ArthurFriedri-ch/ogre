@@ -113,6 +113,8 @@ namespace Ogre {
     String mManualNamedConstantsFile;
     /// Does this (vertex) program include pose animation (count of number of poses supported)
     ushort mPoseAnimation;
+    /// Descriptor set profile override (Vulkan). Empty string means "no override".
+    String mDescriptorSetProfile;
 
     /** Internal method for setting up the basic parameter definitions for a subclass.
 
@@ -170,6 +172,13 @@ namespace Ogre {
 
     /** Sets the syntax code for this program e.g. arbvp1, fp20, vs_1_1 etc */
     void setSyntaxCode(const String& syntax);
+
+    /** Sets a descriptor set profile override (Vulkan-specific hint). Empty string
+        means "no override" and lets the render system pick automatically based on
+        program type (e.g. compute programs use the Compute profile). */
+    void setDescriptorSetProfile(const String& profile) { mDescriptorSetProfile = profile; }
+    /** Gets the descriptor set profile override, if any. @see setDescriptorSetProfile */
+    const String& getDescriptorSetProfile() const { return mDescriptorSetProfile; }
 
     /** Gets the name of the file used as source for this program. */
     const String& getSourceFile(void) const { return mFilename; }

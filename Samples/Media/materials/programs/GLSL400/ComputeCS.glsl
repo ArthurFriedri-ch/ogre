@@ -1,9 +1,12 @@
 #version 430
 
-layout(binding = 0, rgba8) writeonly uniform image2D image_data;
+#include <OgreUnifiedCompute.h>
 
-uniform float roll;
+layout(binding = OGRE_COMPUTE_IMAGE_BINDING, rgba8) writeonly uniform image2D image_data;
 
+layout(binding = OGRE_COMPUTE_UBO_BINDING, std140) uniform OgreUniforms {
+    float roll;
+};
 layout (local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 
 // source/ details: http://wili.cc/blog/opengl-cs.html

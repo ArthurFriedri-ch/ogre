@@ -81,10 +81,12 @@ namespace Ogre
     };
 
     using CmdInstancing = SimpleParamCommand<GpuProgram, bool, &GpuProgram::isInstancingIncluded, &GpuProgram::setInstancingIncluded>;
+    using CmdDescriptorSetProfile = SimpleParamCommand<GpuProgram, const String&, &GpuProgram::getDescriptorSetProfile, &GpuProgram::setDescriptorSetProfile>;
     // Command object for setting / getting parameters
     static CmdType msTypeCmd;
     static CmdSyntax msSyntaxCmd;
     static CmdInstancing msInstancingCmd;
+    static CmdDescriptorSetProfile msDescriptorSetProfileCmd;
     static CmdSkeletal msSkeletalCmd;
     static CmdMorph msMorphCmd;
     static CmdPose msPoseCmd;
@@ -416,6 +418,11 @@ namespace Ogre
             ParameterDef("manual_named_constants",
                          "File containing named parameter mappings for low-level programs.", PT_BOOL),
             &msManNamedConstsFileCmd);
+        dict->addParameter(
+            ParameterDef("descriptor_set_profile",
+                         "Descriptor set profile override, forwarded as-is to the delegate program.",
+                         PT_STRING),
+            &msDescriptorSetProfileCmd);
     }
 
     //-----------------------------------------------------------------------
