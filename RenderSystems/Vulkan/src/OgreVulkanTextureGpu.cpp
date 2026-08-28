@@ -725,16 +725,6 @@ namespace Ogre
         vmaDestroyImage(device->getAllocator(), mMsaaTextureName, mMsaaAllocation);
     }
 
-    void VulkanTextureGpu::destroyStorageImageView( void )
-    {
-        if( mStorageImageView != VK_NULL_HANDLE )
-        {
-            VulkanDevice *device = static_cast<VulkanTextureGpuManager*>(mCreator)->getDevice();
-            vkDestroyImageView( device->mDevice, mStorageImageView, nullptr );
-            mStorageImageView = VK_NULL_HANDLE;
-        }
-    }
-
     VkImageView VulkanTextureGpu::getStorageImageView( int mipmapLevel )
     {
         // If the view already exists and is for the correct mip level, return it

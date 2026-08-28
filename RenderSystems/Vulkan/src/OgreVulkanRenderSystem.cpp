@@ -980,7 +980,6 @@ namespace Ogre
     void VulkanRenderSystem::_beginFrame( void )
     {
         uint32 frameIdx = mDevice->mGraphicsQueue.mCurrentFrameIdx;
-        mDeferredViewDeletions[frameIdx].clear();
     }
     //-------------------------------------------------------------------------
     void VulkanRenderSystem::_notifyActiveEncoderEnded()

@@ -103,9 +103,6 @@ namespace Ogre
 
         bool mHasValidationLayers;
 
-        static const uint32 FRAMES_IN_FLIGHT = 3;
-        std::vector<VkImageView> mDeferredViewDeletions[FRAMES_IN_FLIGHT];
-
         PFN_vkCreateDebugReportCallbackEXT CreateDebugReportCallback;
         PFN_vkDestroyDebugReportCallbackEXT DestroyDebugReportCallback;
         VkDebugReportCallbackEXT mDebugReportCallback;

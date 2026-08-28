@@ -418,11 +418,6 @@ namespace Ogre
             ParameterDef("manual_named_constants",
                          "File containing named parameter mappings for low-level programs.", PT_BOOL),
             &msManNamedConstsFileCmd);
-        dict->addParameter(
-            ParameterDef("descriptor_set_profile",
-                         "Descriptor set profile override, forwarded as-is to the delegate program.",
-                         PT_STRING),
-            &msDescriptorSetProfileCmd);
     }
 
     //-----------------------------------------------------------------------

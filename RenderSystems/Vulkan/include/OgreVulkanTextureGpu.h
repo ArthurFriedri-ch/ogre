@@ -113,7 +113,7 @@ namespace Ogre
         VkImage mMsaaTextureName;
         VmaAllocation mMsaaAllocation;
 
-        VkImageView mStorageImageView;
+        VkImageView mStorageImageView = VK_NULL_HANDLE;
         int mStorageViewMipLevel = -1;
     public:
         /// The current layout we're in. Including any internal stuff.
@@ -135,7 +135,6 @@ namespace Ogre
 
         virtual void createMsaaSurface( void );
         virtual void destroyMsaaSurface( void );
-        virtual void destroyStorageImageView( void );
     public:
         bool hasMsaaExplicitResolves() const { return false; }
         bool isUav() const { return (getUsage() & TU_UNORDERED_ACCESS) != 0; }
